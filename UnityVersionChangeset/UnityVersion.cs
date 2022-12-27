@@ -39,17 +39,17 @@ namespace UnityVersionChangeset
             /// <summary>
             /// Release. Uses "f" letter in patch part
             /// </summary>
-            Release = 0,
+            Alpha = 0,
             
             /// <summary>
             /// Alpha. Uses "a" letter in patch part
             /// </summary>
-            Alpha,
+            Beta,
             
             /// <summary>
             /// Beta. Uses "b" letter in patch part
             /// </summary>
-            Beta
+            Release
         }
         
         /// <summary>
@@ -119,7 +119,86 @@ namespace UnityVersionChangeset
         {
             return new UnityVersion(version.Major, version.Minor, version.Build);
         }
+
+        /// <summary>
+        /// Determines whether two specified <see cref="UnityVersion">UnityVersion</see> objects are equal.
+        /// </summary>
+        /// <param name="left">The first <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <param name="right">The second <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <returns>True if left equals right; otherwise, false.</returns>
+        public static bool operator ==(UnityVersion left, UnityVersion right)
+        {
+            if (right is null)
+                return left is null;
+            
+            return ReferenceEquals(left, right) || right.Equals(left);
+        }
         
+        /// <summary>
+        /// Determines whether two specified <see cref="UnityVersion">UnityVersion</see> objects are not equal.
+        /// </summary>
+        /// <param name="left">The first <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <param name="right">The second <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <returns>True if left doesn't equals right; otherwise, false.</returns>
+        public static bool operator !=(UnityVersion left, UnityVersion right)
+        {
+            return !(left == right);
+        }
+
+        /// <summary>
+        /// Determines whether the first specified <see cref="UnityVersion">UnityVersion</see> object is less than
+        /// the second specified <see cref="UnityVersion">UnityVersion</see> object.
+        /// </summary>
+        /// <param name="left">The first <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <param name="right">The second <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <returns>True if left is less than right; otherwise, false.</returns>
+        public static bool operator <(UnityVersion left, UnityVersion right)
+        {
+            if (left is null || right is null)
+                return true;
+
+            return left.CompareTo(right) < 0;
+        }
+        
+        /// <summary>
+        /// Determines whether the first specified <see cref="UnityVersion">UnityVersion</see> object is less than
+        /// or equal to the second <see cref="UnityVersion">UnityVersion</see> object.
+        /// </summary>
+        /// <param name="left">The first <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <param name="right">The second <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <returns>True if left is less than or equal to right; otherwise, false.</returns>
+        public static bool operator <=(UnityVersion left, UnityVersion right)
+        {
+            if (left is null || right is null)
+                return true;
+
+            return left.CompareTo(right) <= 0;
+        }
+
+        /// <summary>
+        /// Determines whether the first specified <see cref="UnityVersion">UnityVersion</see> object is greater than
+        /// the second specified <see cref="UnityVersion">UnityVersion</see> object.
+        /// </summary>
+        /// <param name="left">The first <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <param name="right">The second <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <returns>True if left is greater than right; otherwise, false.</returns>
+        public static bool operator >(UnityVersion left, UnityVersion right)
+        {
+            return right < left;
+        }
+        
+        /// <summary>
+        /// Determines whether the first specified <see cref="UnityVersion">UnityVersion</see> object is greater than
+        /// or equal to the second <see cref="UnityVersion">UnityVersion</see> object.
+        /// </summary>
+        /// <param name="left">The first <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <param name="right">The second <see cref="UnityVersion">UnityVersion</see> object</param>
+        /// <returns>True if left is greater than or equal to right; otherwise, false.</returns>
+        public static bool operator >=(UnityVersion left, UnityVersion right)
+        {
+            return right <= left;
+        }
+
         public override string ToString()
         {
             if (Type != VersionType.Release)
