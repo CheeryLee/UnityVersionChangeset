@@ -29,13 +29,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using UnityVersionChangeset.Models;
 
-namespace UnityVersionChangeset
+namespace UnityVersionChangeset.Crawlers
 {
     internal class UnityHtmlParser
     {
-        private readonly HttpClient _httpClient = new();
-
         private const string ReleaseArchiveUrl = "https://unity.com/releases/editor/archive";
         private const string BetaUrl = "https://unity.com/releases/editor/beta";
         private const string AlphaUrl = "https://unity.com/releases/editor/alpha";
@@ -46,13 +45,11 @@ namespace UnityVersionChangeset
         private const string AlphaBetaTitleTagPattern = "<td headers=\"view-title-table-column\".*?>(.*?)\\s*?<\\/td>";
         private const string AlphaBetaDateTagPattern = "<td headers=\"view-release-date-table-column\".*?><.*?>(.*?)<\\/time>\\s*?<\\/td>";
         private const string ChangeSetTagPattern = "<div class=\"changeset\">\\s+<div>.*?<\\/div>\\s+<div>(.*?)\\s?<\\/div>";
-        
-        private const int TimeoutSec = 10;
 
         internal async Task<RequestResult<string>> GetChangeSet([NotNull] UnityVersion version, CancellationToken cancellationToken)
         {
             if (cancellationToken == CancellationToken.None)
-                cancellationToken = CreateCancellationToken().Token;
+                cancellationToken = NetworkManager.CreateCancellationToken().Token;
 
             var url = version.Type switch
             {
@@ -89,7 +86,7 @@ namespace UnityVersionChangeset
         internal async Task<RequestResult<IEnumerable<BuildData>>> GetReleaseVersions(CancellationToken cancellationToken)
         {
             if (cancellationToken == CancellationToken.None)
-                cancellationToken = CreateCancellationToken().Token;
+                cancellationToken = NetworkManager.CreateCancellationToken().Token;
 
             return await GetVersions(ReleaseArchiveUrl, ReleaseTitleTagPattern, ReleaseDateTagPattern,
                 value =>
@@ -102,7 +99,7 @@ namespace UnityVersionChangeset
         internal async Task<RequestResult<IEnumerable<BuildData>>> GetAlphaVersions(CancellationToken cancellationToken)
         {
             if (cancellationToken == CancellationToken.None)
-                cancellationToken = CreateCancellationToken().Token;
+                cancellationToken = NetworkManager.CreateCancellationToken().Token;
 
             return await GetVersions(AlphaUrl, AlphaBetaTitleTagPattern, AlphaBetaDateTagPattern,
                 value => value, cancellationToken);
@@ -111,7 +108,7 @@ namespace UnityVersionChangeset
         internal async Task<RequestResult<IEnumerable<BuildData>>> GetBetaVersions(CancellationToken cancellationToken)
         {
             if (cancellationToken == CancellationToken.None)
-                cancellationToken = CreateCancellationToken().Token;
+                cancellationToken = NetworkManager.CreateCancellationToken().Token;
 
             return await GetVersions(BetaUrl, AlphaBetaTitleTagPattern, AlphaBetaDateTagPattern,
                 value => value, cancellationToken);
@@ -218,7 +215,7 @@ namespace UnityVersionChangeset
             
             try
             {
-                var response = await _httpClient.GetAsync(url, cancellationToken);
+                var response = await NetworkManager.HttpClient.GetAsync(url, cancellationToken);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                     data = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -239,11 +236,6 @@ namespace UnityVersionChangeset
                 Status = status,
                 Result = data
             };
-        }
-
-        private static CancellationTokenSource CreateCancellationToken()
-        {
-            return new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSec));
         }
     }
 }

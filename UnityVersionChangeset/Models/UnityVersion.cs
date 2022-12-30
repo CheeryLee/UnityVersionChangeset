@@ -24,7 +24,7 @@ using System;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace UnityVersionChangeset
+namespace UnityVersionChangeset.Models
 {
     /// <summary>
     /// Represents the version number of a Unity engine release. This class cannot be inherited.

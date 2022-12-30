@@ -20,28 +20,53 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
-using System;
-
-namespace UnityVersionChangeset
+namespace UnityVersionChangeset.Models
 {
     /// <summary>
-    /// Data class that contains the info about one version of engine
+    /// Possible result status 
     /// </summary>
-    public class BuildData
+    public enum ResultStatus
     {
         /// <summary>
-        /// The version of engine
+        /// Everything is OK
         /// </summary>
-        public UnityVersion Version { get; internal init; }
+        Ok = 0,
         
         /// <summary>
-        /// Release date. Contains only date, the time always equals to midnight.
+        /// Probably Unity version hasn't been found
         /// </summary>
-        public DateTime ReleaseDate { get; internal init; }
+        NotFound,
         
         /// <summary>
-        /// Build changeset sum
+        /// Something happened to HTTP connection
         /// </summary>
-        internal string ChangeSet { get; set; }
+        HttpError,
+        
+        /// <summary>
+        /// No valid regex output
+        /// </summary>
+        RegexNoValue,
+        
+        /// <summary>
+        /// Unknown type of error
+        /// </summary>
+        UnknownError
+    }
+    
+    /// <summary>
+    /// A structure that contains the status of requested operation and it's result
+    /// </summary>
+    /// <typeparam name="T">Result type</typeparam>
+    public struct RequestResult<T>
+    {
+        /// <summary>
+        /// Status value
+        /// </summary>
+        public ResultStatus Status;
+        
+        /// <summary>
+        /// Result value
+        /// </summary>
+        public T Result;
     }
 }
