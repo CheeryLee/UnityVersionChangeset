@@ -283,6 +283,22 @@ namespace UnityVersionChangeset
         }
 
         /// <summary>
+        /// Get info about all installable modules for the required engine version
+        /// </summary>
+        /// <param name="version">String representation of the version of engine</param>
+        /// <param name="platform">The platform where Unity editor is running</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation
+        /// </param>
+        /// <returns>A list with modules</returns>
+        [PublicAPI]
+        public static async Task<RequestResult<IEnumerable<ModuleData>>> GetModulesAsync([NotNull] string version,
+            Platform platform, CancellationToken cancellationToken = default)
+        {
+            return await GetModulesAsync(new UnityVersion(version), platform, cancellationToken);
+        }
+        
+        /// <summary>
         /// Get info about all installable modules for the required engine version with a cancellation token as an
         /// asynchronous operation
         /// </summary>
@@ -333,6 +349,18 @@ namespace UnityVersionChangeset
                     Result = result
                 };
             }
+        }
+        
+        /// <summary>
+        /// Get info about all installable modules for the required engine version
+        /// </summary>
+        /// <param name="version">String representation of the version of engine</param>
+        /// <param name="platform">The platform where Unity editor is running</param>
+        /// <returns>A list with modules</returns>
+        [PublicAPI]
+        public static RequestResult<IEnumerable<ModuleData>> GetModules([NotNull] string version, Platform platform)
+        {
+            return GetModulesAsync(new UnityVersion(version), platform).ConfigureAwait(true).GetAwaiter().GetResult();
         }
         
         /// <summary>
