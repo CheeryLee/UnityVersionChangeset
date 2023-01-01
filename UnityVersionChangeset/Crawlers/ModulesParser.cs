@@ -67,7 +67,7 @@ namespace UnityVersionChangeset.Crawlers
                 if (string.IsNullOrEmpty(line))
                     continue;
 
-                if (line.StartsWith('[') && line.EndsWith(']'))
+                if (line.StartsWith("[") && line.EndsWith("]"))
                     header = line;
 
                 if (_targetInstallerKeys.Any(x => line.Contains(x)))
@@ -103,7 +103,7 @@ namespace UnityVersionChangeset.Crawlers
                 var response = await NetworkManager.HttpClient.GetAsync(url, cancellationToken);
 
                 if (response.StatusCode == HttpStatusCode.OK)
-                    data = await response.Content.ReadAsStringAsync(cancellationToken);
+                    data = await response.Content.ReadAsStringAsync();
                 else if (response.StatusCode == HttpStatusCode.Unauthorized ||
                          response.StatusCode == HttpStatusCode.NotFound)
                     status = ResultStatus.NotFound;

@@ -30,11 +30,11 @@ namespace UnityVersionChangeset.Models
         /// <summary>
         /// The ID that can be used for Unity Hub
         /// </summary>
-        public string Id { get; internal init; }
+        public string Id { get; internal set; }
         
         /// <summary>
         /// Pretty looking name
         /// </summary>
-        public string Name { get; internal init; }
+        public string Name { get; internal set; }
     }
 }

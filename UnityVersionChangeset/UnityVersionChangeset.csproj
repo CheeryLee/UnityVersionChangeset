@@ -1,8 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+        <LangVersion>8.0</LangVersion>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <Title>UnityVersionChangeset</Title>
+        <Authors>Alexander Pluzhnikov</Authors>
+        <Description>A small .NET library to work with Unity game engine releases archive</Description>
+        <Copyright>Alexander Pluzhnikov (c) 2022 - 2023</Copyright>
+        <PackageProjectUrl>https://github.com/CheeryLee/UnityVersionChangeset</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageVersion>1.0.0</PackageVersion>
+        <RepositoryUrl>https://github.com/CheeryLee/UnityVersionChangeset</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>unity unity3d changeset version ci csharp</PackageTags>
     </PropertyGroup>
 
 </Project>

@@ -36,9 +36,9 @@ namespace UnityVersionChangeset
     /// </summary>
     public static class UnityVersionManager
     {
-        private static readonly UnityHtmlParser _htmlParser = new();
-        private static readonly ModulesParser _modulesParser = new();
-        private static readonly Dictionary<UnityVersion, BuildData> _data = new();
+        private static readonly UnityHtmlParser _htmlParser = new UnityHtmlParser();
+        private static readonly ModulesParser _modulesParser = new ModulesParser();
+        private static readonly Dictionary<UnityVersion, BuildData> _data = new Dictionary<UnityVersion, BuildData>();
 
         /// <summary>
         /// Get info about all available versions of engine with a cancellation token as an

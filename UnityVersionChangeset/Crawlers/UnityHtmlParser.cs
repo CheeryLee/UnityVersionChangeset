@@ -218,7 +218,7 @@ namespace UnityVersionChangeset.Crawlers
                 var response = await NetworkManager.HttpClient.GetAsync(url, cancellationToken);
 
                 if (response.StatusCode == HttpStatusCode.OK)
-                    data = await response.Content.ReadAsStringAsync(cancellationToken);
+                    data = await response.Content.ReadAsStringAsync();
                 else if (response.StatusCode == HttpStatusCode.NotFound)
                     status = ResultStatus.NotFound;
             }

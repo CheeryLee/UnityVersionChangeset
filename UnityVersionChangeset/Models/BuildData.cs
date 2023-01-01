@@ -33,12 +33,12 @@ namespace UnityVersionChangeset.Models
         /// <summary>
         /// The version of engine
         /// </summary>
-        public UnityVersion Version { get; internal init; }
+        public UnityVersion Version { get; internal set; }
         
         /// <summary>
         /// Release date. Contains only date, the time always equals to midnight.
         /// </summary>
-        public DateTime ReleaseDate { get; internal init; }
+        public DateTime ReleaseDate { get; internal set; }
         
         /// <summary>
         /// Installable modules

@@ -6,7 +6,7 @@ namespace UnityVersionChangeset
 {
     internal static class NetworkManager
     {
-        internal static HttpClient HttpClient { get; } = new();
+        internal static HttpClient HttpClient { get; } = new HttpClient();
         
         private const int TimeoutSec = 10;
         
