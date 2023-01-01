@@ -20,34 +20,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
-using System;
-using System.Collections.Generic;
-
 namespace UnityVersionChangeset.Models
 {
     /// <summary>
-    /// Data class that contains the info about one version of engine
+    /// Data class that contains the info about installable module of the engine
     /// </summary>
-    public class BuildData
+    public class ModuleData
     {
         /// <summary>
-        /// The version of engine
+        /// The ID that can be used for Unity Hub
         /// </summary>
-        public UnityVersion Version { get; internal init; }
+        public string Id { get; internal init; }
         
         /// <summary>
-        /// Release date. Contains only date, the time always equals to midnight.
+        /// Pretty looking name
         /// </summary>
-        public DateTime ReleaseDate { get; internal init; }
-        
-        /// <summary>
-        /// Installable modules
-        /// </summary>
-        internal List<ModuleData> Modules { get; set; }
-        
-        /// <summary>
-        /// Build changeset sum
-        /// </summary>
-        internal string ChangeSet { get; set; }
+        public string Name { get; internal init; }
     }
 }

@@ -83,6 +83,13 @@ namespace UnityVersionChangeset.App
             {
                 PrintChangeSet(arg);
             }
+            
+            arg = args.FirstOrDefault(x => x.Contains("--modules"));
+            if (!string.IsNullOrEmpty(arg))
+            {
+                var platformArg = args.FirstOrDefault(x => x.Contains("--platform"));
+                PrintModules(arg, platformArg);
+            }
         }
 
         private static void PrintVersions(string arg)
@@ -108,20 +115,35 @@ namespace UnityVersionChangeset.App
             switch (argParts[1])
             {
                 case "all":
-                    CreateTableView(data.Result);
+                    Print(data.Result.ToList());
                     break;
                 
                 case "release":
-                    CreateTableView(data.Result.Where(x => x.Version.Type == UnityVersion.VersionType.Release));
+                    Print(data.Result.Where(x => x.Version.Type == UnityVersion.VersionType.Release).ToList());
                     break;
                 
                 case "alpha":
-                    CreateTableView(data.Result.Where(x => x.Version.Type == UnityVersion.VersionType.Alpha));
+                    Print(data.Result.Where(x => x.Version.Type == UnityVersion.VersionType.Alpha).ToList());
                     break;
                 
                 case "beta":
-                    CreateTableView(data.Result.Where(x => x.Version.Type == UnityVersion.VersionType.Beta));
+                    Print(data.Result.Where(x => x.Version.Type == UnityVersion.VersionType.Beta).ToList());
                     break;
+            }
+
+            void Print(IList<BuildData> buildData)
+            {
+                var table = new TableView(new List<string>
+                {
+                    "VERSION",
+                    "DATE"
+                },
+                buildData.Select(x => new List<string>
+                {
+                    x.Version.ToString(),
+                    x.ReleaseDate.ToString("dd/MM/yyyy")
+                }).ToList());
+                table.Print();
             }
         }
         
@@ -145,7 +167,21 @@ namespace UnityVersionChangeset.App
                 return;
             }
             
-            CreateTableView(new []{ data.Result });
+            var table = new TableView(new List<string>
+            {
+                "VERSION",
+                "DATE",
+                "CHANGESET"
+            }, new List<List<string>>
+            {
+                new()
+                {
+                    data.Result.Version.ToString(),
+                    data.Result.ReleaseDate.ToString("dd/MM/yyyy"),
+                    data.Result.ChangeSet
+                }
+            });
+            table.Print();
         }
         
         private static void PrintChangeSet(string arg)
@@ -171,59 +207,51 @@ namespace UnityVersionChangeset.App
             Console.WriteLine($"Changeset: {data.Result}");
         }
 
-        private static void CreateTableView(IEnumerable<BuildData> data)
+        private static void PrintModules(string versionArg, string platformArg)
         {
-            var row = new StringBuilder();
-            const int padding = 5;
-            const string versionLabel = "VERSION";
-            const string dateLabel = "DATE";
-            const string changesetLabel = "CHANGESET";
-            var versionColumnWidth = versionLabel.Length + padding * 2;
-            var dateColumnWidth = dateLabel.Length + padding * 2;
-            var changesetColumnWidth = changesetLabel.Length + padding * 2;
+            var versionArgParts = versionArg?.Split('=');
+            var platformArgParts = platformArg?.Split('=');
 
-            row.Append('-', versionColumnWidth + dateColumnWidth + changesetColumnWidth + 2);
-            var rowStr = row.ToString();
-            
-            row.Clear();
-            row.Append(' ', padding);
-            row.Append(versionLabel);
-            row.Append(' ', padding);
-            row.Append('|');
-            row.Append(' ', padding);
-            row.Append(dateLabel);
-            row.Append(' ', padding);
-            row.Append('|');
-            row.Append(' ', padding);
-            row.Append(changesetLabel);
-            row.Append(' ', padding);
-            var titleStr = row.ToString();
-            
-            Console.WriteLine(rowStr);
-            
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine(titleStr);
-            Console.ResetColor();
-            
-            Console.WriteLine(rowStr);
-
-            foreach (var item in data)
+            if (versionArgParts == null || versionArgParts.Length < 2)
             {
-                var version = item.Version.ToString();
-                var date = item.ReleaseDate.ToString("dd/MM/yyyy");
-                var changeset = item.ChangeSet;
-
-                row.Clear();
-                row.Append(' ', 2);
-                row.Append(version);
-                row.Append(' ', versionColumnWidth - version.Length);
-                row.Append(date);
-                row.Append(' ', dateColumnWidth - version.Length);
-                row.Append(changeset);
-                
-                Console.WriteLine(row);
+                Console.WriteLine("Can't determine version string");
+                PrintHelp();
+                return;
             }
+            
+            if (platformArgParts == null || platformArgParts.Length < 2)
+            {
+                Console.WriteLine("Can't determine platform string");
+                PrintHelp();
+                return;
+            }
+            
+            Console.WriteLine("Loading data ...");
+            var version = new UnityVersion(versionArgParts[1]);
+            var platform = EditorPlatformUtil.PlatformFromString(platformArgParts[1]);
+            var data = UnityVersionManager.GetModules(version, platform);
+            
+            if (data.Status != ResultStatus.Ok)
+            {
+                PrintError(data.Status);
+                return;
+            }
+
+            var table = new TableView(new List<string>
+            {
+                "VERSION",
+                "PLATFORM",
+                "MODULES"
+            }, new List<List<string>>
+            {
+                new()
+                {
+                    version.ToString(),
+                    platform.ToString(),
+                    string.Join(", ", data.Result.Select(x => x.Id))
+                }
+            });
+            table.Print();
         }
 
         private static void PrintHelp()
@@ -246,11 +274,15 @@ namespace UnityVersionChangeset.App
             builder.AppendLine("\t\talpha\t\tAlpha versions");
             builder.AppendLine("\t\tbeta\t\tBeta versions");
             
-            builder.Append("\t--show-version=ver\t");
+            builder.Append("\t--show-version=version\t");
             builder.AppendLine("Show the info about required version of engine");
             
-            builder.Append("\t--changeset=ver\t\t");
+            builder.Append("\t--changeset=version\t");
             builder.AppendLine("Get changeset sum of required version of engine");
+            
+            builder.Append("\t--modules=version\t\t\t");
+            builder.AppendLine("List all available installable modules");
+            builder.AppendLine("\t\t--platform=[win, linux, osx]\tThe platform where Unity editor is running");
             
             Console.WriteLine(builder);
         }

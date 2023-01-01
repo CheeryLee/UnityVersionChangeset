@@ -22,6 +22,7 @@ SOFTWARE. */
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -35,7 +36,8 @@ namespace UnityVersionChangeset
     /// </summary>
     public static class UnityVersionManager
     {
-        private static readonly UnityHtmlParser _parser = new();
+        private static readonly UnityHtmlParser _htmlParser = new();
+        private static readonly ModulesParser _modulesParser = new();
         private static readonly Dictionary<UnityVersion, BuildData> _data = new();
 
         /// <summary>
@@ -53,9 +55,9 @@ namespace UnityVersionChangeset
             
             if (_data.Count == 0)
             {
-                var releaseVersions = await _parser.GetReleaseVersions(cancellationToken);
-                var alphaVersions = await _parser.GetAlphaVersions(cancellationToken);
-                var betaVersions = await _parser.GetBetaVersions(cancellationToken);
+                var releaseVersions = await _htmlParser.GetReleaseVersions(cancellationToken);
+                var alphaVersions = await _htmlParser.GetAlphaVersions(cancellationToken);
+                var betaVersions = await _htmlParser.GetBetaVersions(cancellationToken);
                 
                 if (releaseVersions.Status != ResultStatus.Ok)
                 {
@@ -244,7 +246,7 @@ namespace UnityVersionChangeset
                     Result = buildData.ChangeSet
                 };
             
-            var changeSetResponse = await _parser.GetChangeSet(version, cancellationToken);
+            var changeSetResponse = await _htmlParser.GetChangeSet(version, cancellationToken);
             buildData.ChangeSet = changeSetResponse.Result;
 
             return new RequestResult<string>
@@ -281,12 +283,77 @@ namespace UnityVersionChangeset
         }
 
         /// <summary>
+        /// Get info about all installable modules for the required engine version with a cancellation token as an
+        /// asynchronous operation
+        /// </summary>
+        /// <param name="version">The version of engine</param>
+        /// <param name="platform">The platform where Unity editor is running</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation
+        /// </param>
+        /// <exception cref="ArgumentNullException">version is null</exception>
+        /// <returns>A list with modules</returns>
+        [PublicAPI]
+        public static async Task<RequestResult<IEnumerable<ModuleData>>> GetModulesAsync([NotNull] UnityVersion version,
+            Platform platform, CancellationToken cancellationToken = default)
+        {
+            if (version == null)
+                throw new ArgumentNullException(nameof(version), "Version can't be null");
+            
+            var versionsResponse = await GetAllVersionsAsync(cancellationToken);
+
+            if (versionsResponse.Status != ResultStatus.Ok)
+                return CreateResult(versionsResponse.Status, Enumerable.Empty<ModuleData>());
+
+            if (!_data.TryGetValue(version, out var buildData))
+                return CreateResult(ResultStatus.NotFound, Enumerable.Empty<ModuleData>());
+
+            if (buildData.Modules != null)
+                return CreateResult(ResultStatus.Ok, buildData.Modules);
+            
+            var changeSetResponse = await GetChangeSetAsync(version, cancellationToken);
+            
+            if (changeSetResponse.Status != ResultStatus.Ok)
+                return CreateResult(changeSetResponse.Status, Enumerable.Empty<ModuleData>());
+
+            var modulesResponse = await _modulesParser.GetModules(buildData.ChangeSet, 
+                platform, cancellationToken);
+
+            if (modulesResponse.Status != ResultStatus.Ok)
+                return CreateResult(modulesResponse.Status, Enumerable.Empty<ModuleData>());
+
+            buildData.Modules = modulesResponse.Result.ToList();
+            return CreateResult(modulesResponse.Status, modulesResponse.Result.ToList());
+
+            RequestResult<IEnumerable<ModuleData>> CreateResult(ResultStatus status, IEnumerable<ModuleData> result)
+            {
+                return new RequestResult<IEnumerable<ModuleData>>
+                {
+                    Status = status,
+                    Result = result
+                };
+            }
+        }
+        
+        /// <summary>
+        /// Get info about all installable modules for the required engine version
+        /// </summary>
+        /// <param name="version">The version of engine</param>
+        /// <param name="platform">The platform where Unity editor is running</param>
+        /// <returns>A list with modules</returns>
+        [PublicAPI]
+        public static RequestResult<IEnumerable<ModuleData>> GetModules([NotNull] UnityVersion version, Platform platform)
+        {
+            return GetModulesAsync(version, platform).ConfigureAwait(true).GetAwaiter().GetResult();
+        }
+            
+        /// <summary>
         /// Clear all cached data from previous requests
         /// </summary>
         [PublicAPI]
         public static void Flush()
         {
             _data.Clear();
-        } 
+        }
     }
 }
