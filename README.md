@@ -51,6 +51,20 @@ changeSet = await UnityVersionManager.GetChangeSetAsync("2020.3.34");
 Console.WriteLine(changeSet); // 9a4c9c70452b
 ```
 
+#### Installable modules
+Also you can find the platform targets Unity is building for. To get them, run this:
+```csharp
+// with custom version object:
+var version = new UnityVersion(2020, 3, 34);
+var platform = Platform.Windows; // the platform Unity editor is running
+var modules = await UnityVersionManager.GetModulesAsync(version, platform);
+// or with string signature:
+modules = await UnityVersionManager.GetModulesAsync("2020.3.34", platform);
+
+Console.WriteLine(modules[0].Id); // mac-mono
+Console.WriteLine(modules[0].Name); // Mac Mono
+```
+
 ### Run synchronously
 At the same time with asynchronous methods there are their synchronous alternatives out of the box. To use them run signatures without _Async_ postfix in name.
 
