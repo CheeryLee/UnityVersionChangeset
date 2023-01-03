@@ -13,6 +13,9 @@ A small .NET library to work with Unity game engine releases archive
 * Can be used in your CI/CD environment based on .NET
 * Pretty simple to use
 
+## Installation
+Use raw source from ["Releases"](https://github.com/CheeryLee/UnityVersionChangeset/releases) page to compile it by yourself or import [NuGet package](https://github.com/CheeryLee/UnityVersionChangeset/pkgs/nuget/UnityVersionChangeset).
+
 ## How it works
 Basically the algorithm refers to Unity archive website and parses the resulting HTML that it has received, because there is no "true development" technique to get an information about any engine release.
 
